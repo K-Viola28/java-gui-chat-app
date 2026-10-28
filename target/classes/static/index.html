@@ -1,0 +1,293 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java Chat Application</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #eef2f7;
+            color: #1f2937;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 650px;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.10);
+        }
+
+        .chat-header {
+            background: #283593;
+            color: white;
+            padding: 24px;
+        }
+
+        .chat-header h1 {
+            margin: 0 0 8px;
+            font-size: 24px;
+        }
+
+        .chat-header p {
+            margin: 0;
+            font-size: 14px;
+            color: #e0e7ff;
+        }
+
+        .chat-messages {
+            height: 350px;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: #f8fafc;
+        }
+
+        .message {
+            background: #e0e7ff;
+            padding: 12px 15px;
+            border-radius: 12px;
+            max-width: 85%;
+            overflow-wrap: anywhere;
+            align-self: flex-start;
+        }
+
+        .message .sender {
+            display: block;
+            font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 5px;
+            color: #283593;
+        }
+
+        .message .content {
+            white-space: pre-wrap;
+        }
+
+        .system-message {
+            align-self: center;
+            background: #e5e7eb;
+            color: #4b5563;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .chat-form {
+            padding: 20px;
+            display: grid;
+            gap: 12px;
+        }
+
+        input, textarea, button {
+            font: inherit;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        input, textarea {
+            width: 100%;
+            border: 1px solid #cbd5e1;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 70px;
+        }
+
+        button {
+            border: none;
+            background: #283593;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #3949ab;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        #status {
+            min-height: 18px;
+            font-size: 13px;
+            color: #b91c1c;
+        }
+
+        .footer {
+            padding: 0 20px 16px;
+            color: #64748b;
+            font-size: 12px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="chat-container">
+        <header class="chat-header">
+            <h1>Java Chat Application</h1>
+            <p>A simple chat application powered by Java</p>
+        </header>
+
+        <section
+            id="messages"
+            class="chat-messages"
+            aria-label="Chat messages"
+            aria-live="polite">
+            <p>Loading messages...</p>
+        </section>
+
+        <form id="chatForm" class="chat-form">
+            <label for="sender">Your name</label>
+            <input
+                id="sender"
+                name="sender"
+                type="text"
+                maxlength="50"
+                placeholder="Enter your name"
+                value="Guest"
+                required>
+
+            <label for="content">Your message</label>
+            <textarea
+                id="content"
+                name="content"
+                maxlength="2000"
+                placeholder="Type your message..."
+                required></textarea>
+
+            <button id="sendButton" type="submit">Send Message</button>
+            <p id="status" role="status"></p>
+        </form>
+
+        <footer class="footer">
+            Java backend | Browser interface
+        </footer>
+    </main>
+
+    <script>
+        const messagesContainer = document.getElementById("messages");
+        const chatForm = document.getElementById("chatForm");
+        const senderInput = document.getElementById("sender");
+        const contentInput = document.getElementById("content");
+        const sendButton = document.getElementById("sendButton");
+        const statusText = document.getElementById("status");
+
+        function displayMessages(messages) {
+            messagesContainer.replaceChildren();
+
+            if (messages.length === 0) {
+                const emptyMessage = document.createElement("p");
+                emptyMessage.textContent = "No messages yet. Start the conversation.";
+                messagesContainer.appendChild(emptyMessage);
+                return;
+            }
+
+            for (const message of messages) {
+                const bubble = document.createElement("div");
+                bubble.className = "message";
+
+                if (message.type === "system") {
+                    bubble.classList.add("system-message");
+                    bubble.textContent = message.content;
+                } else {
+                    const sender = document.createElement("span");
+                    sender.className = "sender";
+                    sender.textContent = message.sender;
+
+                    const content = document.createElement("div");
+                    content.className = "content";
+                    content.textContent = message.content;
+
+                    bubble.append(sender, content);
+                }
+
+                messagesContainer.appendChild(bubble);
+            }
+
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        async function loadMessages() {
+            try {
+                const response = await fetch("/api/messages");
+
+                if (!response.ok) {
+                    throw new Error("Could not load messages.");
+                }
+
+                const messages = await response.json();
+                displayMessages(messages);
+                statusText.textContent = "";
+            } catch (error) {
+                statusText.textContent =
+                    "Cannot connect to the Java server. Check that it is running.";
+            }
+        }
+
+        chatForm.addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            const sender = senderInput.value.trim();
+            const content = contentInput.value.trim();
+
+            if (!sender || !content) {
+                statusText.textContent =
+                    "Please enter your name and a message.";
+                return;
+            }
+
+            sendButton.disabled = true;
+            statusText.textContent = "Sending...";
+
+            try {
+                const response = await fetch("/api/messages", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type":
+                            "application/x-www-form-urlencoded;charset=UTF-8"
+                    },
+                    body: new URLSearchParams({ sender, content })
+                });
+
+                if (!response.ok) {
+                    throw new Error("Message could not be sent.");
+                }
+
+                contentInput.value = "";
+                statusText.textContent = "";
+                await loadMessages();
+                contentInput.focus();
+            } catch (error) {
+                statusText.textContent =
+                    "Message failed to send. Check the Java server.";
+            } finally {
+                sendButton.disabled = false;
+            }
+        });
+
+        loadMessages();
+        setInterval(loadMessages, 3000);
+    </script>
+</body>
+</html>
