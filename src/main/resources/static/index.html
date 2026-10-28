@@ -59,34 +59,50 @@
             background: #f8fafc;
         }
 
-        .message {
-            background: #e0e7ff;
-            padding: 12px 15px;
-            border-radius: 12px;
-            max-width: 85%;
-            overflow-wrap: anywhere;
-            align-self: flex-start;
-        }
 
-        .message .sender {
-            display: block;
-            font-weight: bold;
-            font-size: 13px;
-            margin-bottom: 5px;
-            color: #283593;
-        }
+.message {
+    background: #e0e7ff;
+    padding: 12px 15px;
+    border-radius: 12px;
+    max-width: 85%;
+    overflow-wrap: anywhere;
+    align-self: flex-start;
+    margin-right: auto;
+}
 
-        .message .content {
-            white-space: pre-wrap;
-        }
+.message.own-message {
+    align-self: flex-end;
+    margin-left: auto;
+    margin-right: 0;
+    background: #dbeafe;
+}
 
-        .system-message {
-            align-self: center;
-            background: #e5e7eb;
-            color: #4b5563;
-            font-size: 13px;
-            text-align: center;
-        }
+.message .sender {
+    display: block;
+    font-weight: bold;
+    font-size: 13px;
+    margin-bottom: 5px;
+    color: #283593;
+}
+
+.message.own-message .sender {
+    color: #1d4ed8;
+}
+
+.message .content {
+    white-space: pre-wrap;
+}
+
+.system-message {
+    align-self: center;
+    margin-left: auto;
+    margin-right: auto;
+    background: #e5e7eb;
+    color: #4b5563;
+    font-size: 13px;
+    text-align: center;
+}
+
 
         .chat-form {
             padding: 20px;
@@ -193,40 +209,54 @@
         const sendButton = document.getElementById("sendButton");
         const statusText = document.getElementById("status");
 
-        function displayMessages(messages) {
-            messagesContainer.replaceChildren();
 
-            if (messages.length === 0) {
-                const emptyMessage = document.createElement("p");
-                emptyMessage.textContent = "No messages yet. Start the conversation.";
-                messagesContainer.appendChild(emptyMessage);
-                return;
+function displayMessages(messages) {
+    messagesContainer.replaceChildren();
+
+    if (messages.length === 0) {
+        const emptyMessage = document.createElement("p");
+        emptyMessage.textContent =
+            "No messages yet. Start the conversation.";
+        messagesContainer.appendChild(emptyMessage);
+        return;
+    }
+
+    for (const message of messages) {
+        const bubble = document.createElement("div");
+        bubble.className = "message";
+
+        if (message.type === "system") {
+            bubble.classList.add("system-message");
+            bubble.textContent = message.content;
+        } else {
+            const currentUser =
+                senderInput.value.trim().toLowerCase();
+
+            if (
+                currentUser &&
+                message.sender.trim().toLowerCase() === currentUser
+            ) {
+                bubble.classList.add("own-message");
             }
 
-            for (const message of messages) {
-                const bubble = document.createElement("div");
-                bubble.className = "message";
+            const sender = document.createElement("span");
+            sender.className = "sender";
+            sender.textContent = message.sender;
 
-                if (message.type === "system") {
-                    bubble.classList.add("system-message");
-                    bubble.textContent = message.content;
-                } else {
-                    const sender = document.createElement("span");
-                    sender.className = "sender";
-                    sender.textContent = message.sender;
+            const content = document.createElement("div");
+            content.className = "content";
+            content.textContent = message.content;
 
-                    const content = document.createElement("div");
-                    content.className = "content";
-                    content.textContent = message.content;
-
-                    bubble.append(sender, content);
-                }
-
-                messagesContainer.appendChild(bubble);
-            }
-
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            bubble.append(sender, content);
         }
+
+        messagesContainer.appendChild(bubble);
+    }
+
+    messagesContainer.scrollTop =
+        messagesContainer.scrollHeight;
+}
+
 
         async function loadMessages() {
             try {
