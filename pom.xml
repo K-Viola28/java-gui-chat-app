@@ -37,6 +37,7 @@
                 <version>3.6.4</version>
                 <configuration>
                     <mainClass>com.chatapp.ChatServer</mainClass>
+                    
                 </configuration>
             </plugin>
         </plugins>
