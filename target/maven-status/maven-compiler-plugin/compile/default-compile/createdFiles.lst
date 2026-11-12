@@ -1,5 +1,6 @@
-com/chatapp/TextMessage.class
-com/chatapp/Message.class
+com/chatapp/ClearChat.class
 com/chatapp/SystemMessage.class
 com/chatapp/ChatServer.class
+com/chatapp/TextMessage.class
+com/chatapp/Message.class
 com/chatapp/Database.class

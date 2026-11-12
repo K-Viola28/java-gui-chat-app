@@ -107,4 +107,14 @@ public class Database {
 
         return messages;
     }
+
+public void clearMessages() throws SQLException {
+    String sql = "DELETE FROM chat_messages";
+
+    try (Connection connection = connect();
+         Statement statement = connection.createStatement()) {
+
+        statement.executeUpdate(sql);
+    }
+}
 }
