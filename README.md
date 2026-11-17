@@ -11,13 +11,10 @@ A simple Java Swing chat application using OOP concepts and database storage.
 ## Screenshots
 
 ### Chatify Main Interface
-![Chatify Home](Screenshots/Screenshot 2026-11-17 171830.png)
 <img src="Screenshots/Screenshot 2026-11-17 171830.png" width="700">
 
 ### Chat Conversation
-![Chat Conversation](Screenshots/Screenshot 2026-11-17 161828.png)
 <img src="Screenshots/Screenshot 2026-11-17 161828.png" width="700">
 
 ### Message History
-![Message History](Screenshots/Screenshot 2026-11-17 161941.png)
 <img src="Screenshots/Screenshot 2026-11-17 161941.png" width="700">
